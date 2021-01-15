@@ -16,4 +16,14 @@ class Video extends Model
     public function isEditable(Video $video){
        return Auth::check() && $video->channel->user_id == Auth::id();
     }
+
+    public function votes()
+    {
+        return $this->morphMany(Vote::class, 'voteable');
+    }
+
+    public function comments()
+    {
+        return $this->hasMany(Comment::class)->whereNull('comment_id')->orderBy('created_at', 'DESC');
+    }
 }

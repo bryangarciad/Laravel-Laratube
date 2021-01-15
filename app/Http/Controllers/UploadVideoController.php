@@ -15,7 +15,6 @@ class UploadVideoController extends Controller
     }
 
     public function store(Channel $channel){
-        // dd('reached');
 
         $video = $channel->videos()->create([
             'title'=> request()->title,
