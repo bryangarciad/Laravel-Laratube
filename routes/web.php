@@ -4,16 +4,14 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [App\Http\Controllers\HomeController::class, 'index']);
 
 Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 Route::resource('channels', 'App\Http\Controllers\ChannelController');
 
-Route::get('videos/{video}', 'App\Http\Controllers\VideoController@show')->name('videos.show');
+// Route::get('videos/{video}', 'App\Http\Controllers\VideoController@show')
 Route::put('videos/{video}', 'App\Http\Controllers\VideoController@updateViews');
 Route::get('videos/{video}/comments', 'App\Http\Controllers\CommentController@index');
 Route::get('comments/{comment}/replies', 'App\Http\Controllers\CommentController@show');
@@ -29,4 +27,4 @@ Route::middleware(['auth'])->group(function(){
     Route::post('channels/{channel}/videos', 'App\Http\Controllers\UploadVideoController@store');
 });
 
-Route::get('videos/{video}', 'App\Http\Controllers\VideoController@show');
+Route::get('videos/{video}', 'App\Http\Controllers\VideoController@show')->name('videos.show');;

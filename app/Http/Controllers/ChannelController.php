@@ -37,7 +37,8 @@ class ChannelController extends Controller
 
     public function show(Channel $channel)
     {
-        return view('channels.show', compact('channel'));
+        $videos = $channel->videos()->get();
+        return view('channels.show', compact('channel', 'videos'));
     }
 
     public function edit(Channel $channel)
@@ -51,7 +52,7 @@ class ChannelController extends Controller
         if ($request->hasFile('image')){
             $channel->clearMediaCollection('images');
             $channel->addMediaFromRequest('image')->toMediaCollection('images');
-        }
+        }        
         $channel->update([
             'name' => $request->name,
             'description' => $request->description

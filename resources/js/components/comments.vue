@@ -1,11 +1,12 @@
 <template>
     <div class="card mt-5 p-5" >
-
-        <div class="media">
+        <div v-if="userLogged" class="media">
             <div class="media-body">
                 <div class="form-inline my-4 w-full comment-container">
-                    <img class="rounded-circle mr-3"  src="https://cdn.icon-icons.com/icons2/1378/PNG/512/avatardefault_92824.png" alt="">
-                    <input type="text" class="fomr-control form-control-sm w-90" placeholder="Add a comment">
+                    <!-- <img class="rounded-circle mr-3"  :src="userimage" alt=""> -->
+                    <Avatar v-if="currentUser.name" :username="currentUser.name" :size="30" ></Avatar>
+
+                    <input type="text" class="fomr-control form-control-sm w-90 ml-2" placeholder="Add a comment">
                     <button class="btn btn-sm btn-primary ml-2">Comment</button>
                 </div>
             </div>
@@ -15,10 +16,10 @@
         <div class="media" v-if="isDataFetched">
             <!-- COMMENT -->
             <div class="media-body">
-                <div class="comment-container mt-3" v-for="singleComment in dataComments" :key="singleComment.id">
+                <div class="comment-container mt-3 d-flex" v-for="singleComment in dataComments" :key="singleComment.id">
                     <div class="mr-3">
                         <!-- <img v-if="getName(singleComment.id).name" :src="`/public/thumbnail/${getName(singleComment.id).id}.png`" class="rounded-circle mr-1"/> -->
-                        <Avatar v-if="getName(singleComment.id).name" :username="getName(singleComment.id).name" :size="30"></Avatar>
+                        <Avatar v-if="getName(singleComment.id).name" :username="getName(singleComment.id).name" :size="40"></Avatar>
                     </div>
                     <div class="div">
                         <h4>{{getName(singleComment.id).name}}</h4>
@@ -27,10 +28,9 @@
                 </div> 
             </div>
         </div>
-        <div class="text-center">
-            <button @click="fetchComments" class=" btn btn-success mt-2">load more</button>
+        <div class="text-center" v-if="dataComments.length > 0">
+            <button v-if="!btnDisabled" @click="fetchComments" class=" btn btn-success mt-2">load more</button>
         </div>
-        
     </div>
 </template>
 
@@ -42,14 +42,18 @@ import Avatar from 'vue-avatar'
         components:{Avatar},
         props:{
             video:{type: Object, required: true, default: ()=>({})},
-            channel:{required: true, default: ()=>({})}
+            channel:{required: true, default: ()=>({})},
+            userimage: ""
         },
         data: function(){
             return{
                 dataComments: [],
                 isDataFetched: false,
                 userInf: [],
-                page: 1
+                page: 1,
+                userLogged: false,
+                btnDisabled: false,
+                currentUser: {}
             }
         },
         methods:{
@@ -65,22 +69,20 @@ import Avatar from 'vue-avatar'
                 else{
                     return "    "
                 }
-
             },
             fetchComments: function(){
-                console.log(`/videos/${this.video.id}/comments?page=${this.page}`);
-      
+                // console.log(`/videos/${this.video.id}/comments?page=${this.page}`);
+                // hide button when max page ######
                 axios.get(`/videos/${this.video.id}/comments?page=${this.page}`)
                 .then((response)=>{
                     console.log(response.data);
-                    let newData = response.data.data.filter(()=>true);
+                    let newData = response.data.data
                     const maxPage = response.data.last_page;
                     if(this.page <= maxPage){
                         newData.forEach(item => {
                             this.dataComments.push(item)
                         })
                         this.dataComments.forEach(element => {
-                            // console.log(element);
                             axios.get(`/user/${element.user_id}`).then((res)=>{
                                 console.log(res);
                                 res.data['comment_id'] = element.id;
@@ -88,15 +90,17 @@ import Avatar from 'vue-avatar'
                                     ...this.userInf,
                                     res.data,
                                 ];
-                                
                             });
                         });
-                        
+
+                        this.page == maxPage ? this.btnDisabled=true : this.btnDisabled=false;
+
                         this.isDataFetched = true;
                         this.$forceUpdate();
                         this.page++;
                     }
                     else{
+                        this.this.btnDisabled = true; 
                         alert('No more comments to load');
                     }
                 })
@@ -106,6 +110,10 @@ import Avatar from 'vue-avatar'
         mounted() {
             this.fetchComments();
             console.log('Comments mounted.')
+            if(__auth()){
+                this.userLogged = true;
+                this.currentUser = __auth();
+            }
         }
     }
 </script>

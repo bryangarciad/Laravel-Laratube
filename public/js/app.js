@@ -2088,14 +2088,18 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
       "default": function _default() {
         return {};
       }
-    }
+    },
+    userimage: ""
   },
   data: function data() {
     return {
       dataComments: [],
       isDataFetched: false,
       userInf: [],
-      page: 1
+      page: 1,
+      userLogged: false,
+      btnDisabled: false,
+      currentUser: {}
     };
   },
   methods: {
@@ -2115,12 +2119,11 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
     fetchComments: function fetchComments() {
       var _this = this;
 
-      console.log("/videos/".concat(this.video.id, "/comments?page=").concat(this.page));
+      // console.log(`/videos/${this.video.id}/comments?page=${this.page}`);
+      // hide button when max page ######
       axios.get("/videos/".concat(this.video.id, "/comments?page=").concat(this.page)).then(function (response) {
         console.log(response.data);
-        var newData = response.data.data.filter(function () {
-          return true;
-        });
+        var newData = response.data.data;
         var maxPage = response.data.last_page;
 
         if (_this.page <= maxPage) {
@@ -2129,7 +2132,6 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
           });
 
           _this.dataComments.forEach(function (element) {
-            // console.log(element);
             axios.get("/user/".concat(element.user_id)).then(function (res) {
               console.log(res);
               res.data['comment_id'] = element.id;
@@ -2137,12 +2139,14 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
             });
           });
 
+          _this.page == maxPage ? _this.btnDisabled = true : _this.btnDisabled = false;
           _this.isDataFetched = true;
 
           _this.$forceUpdate();
 
           _this.page++;
         } else {
+          _this["this"].btnDisabled = true;
           alert('No more comments to load');
         }
       });
@@ -2151,6 +2155,11 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
   mounted: function mounted() {
     this.fetchComments();
     console.log('Comments mounted.');
+
+    if (__auth()) {
+      this.userLogged = true;
+      this.currentUser = __auth();
+    }
   }
 });
 
@@ -2452,6 +2461,7 @@ Vue.component('subscribe-button', __webpack_require__(/*! ./components/subscribe
 Vue.component('channel-uploads', __webpack_require__(/*! ./components/channel-uploads.vue */ "./resources/js/components/channel-uploads.vue").default);
 Vue.component('comments', __webpack_require__(/*! ./components/comments.vue */ "./resources/js/components/comments.vue").default);
 Vue.component('votes', __webpack_require__(/*! ./components/votes.vue */ "./resources/js/components/votes.vue").default);
+Vue.component('home', __webpack_require__(/*! ./components/home.vue */ "./resources/js/components/home.vue").default);
 var app = new Vue({
   el: '#app'
 });
@@ -39405,6 +39415,40 @@ component.options.__file = "resources/js/components/comments.vue"
 
 /***/ }),
 
+/***/ "./resources/js/components/home.vue":
+/*!******************************************!*\
+  !*** ./resources/js/components/home.vue ***!
+  \******************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => __WEBPACK_DEFAULT_EXPORT__
+/* harmony export */ });
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! !../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+var render, staticRenderFns
+var script = {}
+
+
+/* normalize component */
+;
+var component = (0,_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_0__.default)(
+  script,
+  render,
+  staticRenderFns,
+  false,
+  null,
+  null,
+  null
+  
+)
+
+component.options.__file = "resources/js/components/home.vue"
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (component.exports);
+
+/***/ }),
+
 /***/ "./resources/js/components/subscribe-button.vue":
 /*!******************************************************!*\
   !*** ./resources/js/components/subscribe-button.vue ***!
@@ -39922,7 +39966,33 @@ var render = function() {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c("div", { staticClass: "card mt-5 p-5" }, [
-    _vm._m(0),
+    _vm.userLogged
+      ? _c("div", { staticClass: "media" }, [
+          _c("div", { staticClass: "media-body" }, [
+            _c(
+              "div",
+              { staticClass: "form-inline my-4 w-full comment-container" },
+              [
+                _vm.currentUser.name
+                  ? _c("Avatar", {
+                      attrs: { username: _vm.currentUser.name, size: 30 }
+                    })
+                  : _vm._e(),
+                _vm._v(" "),
+                _c("input", {
+                  staticClass: "fomr-control form-control-sm w-90 ml-2",
+                  attrs: { type: "text", placeholder: "Add a comment" }
+                }),
+                _vm._v(" "),
+                _c("button", { staticClass: "btn btn-sm btn-primary ml-2" }, [
+                  _vm._v("Comment")
+                ])
+              ],
+              1
+            )
+          ])
+        ])
+      : _vm._e(),
     _vm._v(" "),
     _c("h4", [_vm._v("Comments")]),
     _vm._v(" "),
@@ -39938,7 +40008,7 @@ var render = function() {
                 "div",
                 {
                   key: singleComment.id,
-                  staticClass: "comment-container mt-3"
+                  staticClass: "comment-container mt-3 d-flex"
                 },
                 [
                   _c(
@@ -39949,7 +40019,7 @@ var render = function() {
                         ? _c("Avatar", {
                             attrs: {
                               username: _vm.getName(singleComment.id).name,
-                              size: 30
+                              size: 40
                             }
                           })
                         : _vm._e()
@@ -39972,52 +40042,23 @@ var render = function() {
         ])
       : _vm._e(),
     _vm._v(" "),
-    _c("div", { staticClass: "text-center" }, [
-      _c(
-        "button",
-        {
-          staticClass: " btn btn-success mt-2",
-          on: { click: _vm.fetchComments }
-        },
-        [_vm._v("load more")]
-      )
-    ])
+    _vm.dataComments.length > 0
+      ? _c("div", { staticClass: "text-center" }, [
+          !_vm.btnDisabled
+            ? _c(
+                "button",
+                {
+                  staticClass: " btn btn-success mt-2",
+                  on: { click: _vm.fetchComments }
+                },
+                [_vm._v("load more")]
+              )
+            : _vm._e()
+        ])
+      : _vm._e()
   ])
 }
-var staticRenderFns = [
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "media" }, [
-      _c("div", { staticClass: "media-body" }, [
-        _c(
-          "div",
-          { staticClass: "form-inline my-4 w-full comment-container" },
-          [
-            _c("img", {
-              staticClass: "rounded-circle mr-3",
-              attrs: {
-                src:
-                  "https://cdn.icon-icons.com/icons2/1378/PNG/512/avatardefault_92824.png",
-                alt: ""
-              }
-            }),
-            _vm._v(" "),
-            _c("input", {
-              staticClass: "fomr-control form-control-sm w-90",
-              attrs: { type: "text", placeholder: "Add a comment" }
-            }),
-            _vm._v(" "),
-            _c("button", { staticClass: "btn btn-sm btn-primary ml-2" }, [
-              _vm._v("Comment")
-            ])
-          ]
-        )
-      ])
-    ])
-  }
-]
+var staticRenderFns = []
 render._withStripped = true
 
 

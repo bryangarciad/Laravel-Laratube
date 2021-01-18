@@ -7,7 +7,9 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between">
                     {{ $channel->name }}
+                    @if($channel->editable())
                     <a href="{{ route('channel.upload', ['channel'=>$channel]) }}">upload videos</a>
+                    @endif
                 </div>
                 <div class="card-body">
                     @if($channel->editable())
@@ -34,7 +36,7 @@
                                     </svg>
                                 </div>
                             @endif
-                            <img src="{{ asset($channel->image()) }}" alt="{{ $channel->image() }}">
+                            <img style="width: 80px; height:80px" src="{{ asset($channel->image()) }}" alt="{{ $channel->image() }}">
                         </div>
                     </div>
                     @if(!$channel->editable())
@@ -42,7 +44,6 @@
                             <h4 class="text-center">{{ $channel->name }}</h4>
                             <p class="text-center">{{ $channel->description }}</p>
                             <div class="text-center">
-                                <!-- <button class="btn btn-danger">Subscribe</button> -->
                                 <subscribe-button :initialsubscriptions="{{ $channel->subscriptions}}" :channel="{{ $channel }}"></subscribe-button>
                             </div>
                         </div>
@@ -72,6 +73,32 @@
                     </form>
                 </div>
             </div>
+            
+
+            <hr>
+            <div class="card">
+                <div class="card-header d-flex justify-content-between text-center">
+                    <h4 class="text-center"> Uploaded Videos</h4>
+                </div>
+
+                <ul class="list-group">
+                    @foreach($videos as $video )
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div class="col-md-8">
+                                <h4>{{ $video->title }}</h4> 
+                                <small>{{$video->description}}</small>
+                                <small>{{$video->id}}</small>
+                            </div>
+                            <div class="image-parent">
+                                <a href="{{ route('videos.show', ['video'=> $video]) }}">
+                                    <img src='{{ asset(Storage::url("thumbnail/{$video->id}.png"))  }}' class="img-fluid"  style="width:200px" alt="">
+                                </a>
+                            </div>
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+
         </div>
     </div>
 </div>

@@ -19,7 +19,7 @@ class Channel extends Model implements HasMedia
 
     public function image(){
         if($this->media->first()){
-            return str_replace('http://localhost/', '', $this->media->first()->getFullUrl('thumb'));
+            return str_replace('http://localhost/', '', $this->media->first()->getFullUrl(''));
         }
         else{
             return null;

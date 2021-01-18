@@ -8,6 +8,8 @@ Vue.component('subscribe-button', require('./components/subscribe-button.vue').d
 Vue.component('channel-uploads', require('./components/channel-uploads.vue').default);
 Vue.component('comments', require('./components/comments.vue').default);
 Vue.component('votes', require('./components/votes.vue').default);
+Vue.component('home', require('./components/home.vue').default);
+
 
 
 const app = new Vue({

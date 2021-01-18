@@ -12,7 +12,7 @@
                     <div class="card-body">
                         <video
                         id="video"
-                        class="video-js"
+                        class="video-js vjs-big-play-centered"
                         controls
                         preload="auto"
                         width="640"
@@ -39,15 +39,22 @@
                             <div class="media">
                                 <img src="" alt="">
                                 <div class="media-body m1-2">
-                                    <h5 class="mt-0 mb-0">{{ $Video->channel->name}}</h5>
-                                    <span class="small">Published on {{ $Video->created_at->toFormattedDateString()}}</span>
+                                    <div class="form-inline my-4 w-full comment-container">
+                                        <img class="rounded-circle mr-3"  src="{{ asset($Video->channel->image()) }}" alt="" style="width: 40px; height:40px">
+                                        <div>
+                                            <h5 class="mt-0 mb-0" >{{ $Video->channel->name}}</h5>
+                                            <span class="small">Published on {{ $Video->created_at->toFormattedDateString()}}</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <subscribe-button :initialsubscriptions="{{ $Video->channel->subscriptions}}" :channel="{{ $Video->channel }}"></subscribe-button>
                         </div>
                     </div>
             </div>
-            <comments :video="{{ $Video }}" :channel="{{ $Video->channel }}"></comments>
+            
+            <comments :video="{{ $Video }}" :channel="{{ $Video->channel }}" userimage="{{ asset($Video->channel->image()) }}" ></comments>
+
         </div>
     </div>
 </div>
