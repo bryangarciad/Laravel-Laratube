@@ -2123,6 +2123,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
           res.data['comment_id'] = response.data.id;
           _this.userInf = [res.data].concat(_toConsumableArray(_this.userInf));
         });
+        _this.body = "";
       });
     },
     fetchComments: function fetchComments() {

@@ -10924,4 +10924,28 @@ a.text-dark:focus {
   align-items: center;
 }
 
+nav.navbar-red {
+  background-color: red !important;
+}
+
+nav .navbar-red a {
+  color: white !important;
+}
+
+nav .navbar-red .dropdown-menu a {
+  color: black !important;
+}
+
+.navbar-brand {
+  color: white !important;
+}
+
+.nav-item {
+  color: white !important;
+}
+
+.nav-link {
+  color: white !important;
+}
+
 

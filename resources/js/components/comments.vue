@@ -84,6 +84,7 @@ import Avatar from 'vue-avatar'
                             ...this.userInf
                         ];
                     });
+                    this.body = "";
                 })
             },
             fetchComments: function(){
