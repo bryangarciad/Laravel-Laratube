@@ -2067,8 +2067,6 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 //
 //
 //
-//
-//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "comments",
@@ -2099,7 +2097,8 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
       page: 1,
       userLogged: false,
       btnDisabled: false,
-      currentUser: {}
+      currentUser: {},
+      body: ""
     };
   },
   methods: {
@@ -2108,45 +2107,53 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
         // console.log(item.comment_id + "==" + id)
         return item.comment_id == id;
       });
-
-      if (user[0]) {
-        // console.log(user[0].name);
-        return user[0];
-      } else {
-        return "    ";
-      }
+      return user[0] ? user[0] : "";
     },
-    fetchComments: function fetchComments() {
+    uploadComment: function uploadComment() {
       var _this = this;
 
-      // console.log(`/videos/${this.video.id}/comments?page=${this.page}`);
-      // hide button when max page ######
+      var data = {
+        body: this.body
+      };
+      axios.post("/comments/".concat(this.video.id, "/comment"), data).then(function (response) {
+        console.log(response);
+        _this.dataComments = [response.data].concat(_toConsumableArray(_this.dataComments));
+        axios.get("/user/".concat(response.data.user_id)).then(function (res) {
+          console.log(res);
+          res.data['comment_id'] = response.data.id;
+          _this.userInf = [res.data].concat(_toConsumableArray(_this.userInf));
+        });
+      });
+    },
+    fetchComments: function fetchComments() {
+      var _this2 = this;
+
       axios.get("/videos/".concat(this.video.id, "/comments?page=").concat(this.page)).then(function (response) {
         console.log(response.data);
         var newData = response.data.data;
         var maxPage = response.data.last_page;
 
-        if (_this.page <= maxPage) {
+        if (_this2.page <= maxPage) {
           newData.forEach(function (item) {
-            _this.dataComments.push(item);
+            _this2.dataComments.push(item);
           });
 
-          _this.dataComments.forEach(function (element) {
+          _this2.dataComments.forEach(function (element) {
             axios.get("/user/".concat(element.user_id)).then(function (res) {
               console.log(res);
               res.data['comment_id'] = element.id;
-              _this.userInf = [].concat(_toConsumableArray(_this.userInf), [res.data]);
+              _this2.userInf = [].concat(_toConsumableArray(_this2.userInf), [res.data]);
             });
           });
 
-          _this.page == maxPage ? _this.btnDisabled = true : _this.btnDisabled = false;
-          _this.isDataFetched = true;
+          _this2.page == maxPage ? _this2.btnDisabled = true : _this2.btnDisabled = false;
+          _this2.isDataFetched = true;
 
-          _this.$forceUpdate();
+          _this2.$forceUpdate();
 
-          _this.page++;
+          _this2.page++;
         } else {
-          _this["this"].btnDisabled = true;
+          _this2["this"].btnDisabled = true;
           alert('No more comments to load');
         }
       });
@@ -39980,13 +39987,35 @@ var render = function() {
                   : _vm._e(),
                 _vm._v(" "),
                 _c("input", {
+                  directives: [
+                    {
+                      name: "model",
+                      rawName: "v-model",
+                      value: _vm.body,
+                      expression: "body"
+                    }
+                  ],
                   staticClass: "fomr-control form-control-sm w-90 ml-2",
-                  attrs: { type: "text", placeholder: "Add a comment" }
+                  attrs: { type: "text", placeholder: "Add a comment" },
+                  domProps: { value: _vm.body },
+                  on: {
+                    input: function($event) {
+                      if ($event.target.composing) {
+                        return
+                      }
+                      _vm.body = $event.target.value
+                    }
+                  }
                 }),
                 _vm._v(" "),
-                _c("button", { staticClass: "btn btn-sm btn-primary ml-2" }, [
-                  _vm._v("Comment")
-                ])
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-sm btn-primary ml-2",
+                    on: { click: _vm.uploadComment }
+                  },
+                  [_vm._v("Comment")]
+                )
               ],
               1
             )

@@ -3,11 +3,10 @@
         <div v-if="userLogged" class="media">
             <div class="media-body">
                 <div class="form-inline my-4 w-full comment-container">
-                    <!-- <img class="rounded-circle mr-3"  :src="userimage" alt=""> -->
                     <Avatar v-if="currentUser.name" :username="currentUser.name" :size="30" ></Avatar>
 
-                    <input type="text" class="fomr-control form-control-sm w-90 ml-2" placeholder="Add a comment">
-                    <button class="btn btn-sm btn-primary ml-2">Comment</button>
+                    <input type="text" v-model="body"  class="fomr-control form-control-sm w-90 ml-2" placeholder="Add a comment">
+                    <button @click="uploadComment" class="btn btn-sm btn-primary ml-2">Comment</button>
                 </div>
             </div>
         </div>
@@ -18,7 +17,6 @@
             <div class="media-body">
                 <div class="comment-container mt-3 d-flex" v-for="singleComment in dataComments" :key="singleComment.id">
                     <div class="mr-3">
-                        <!-- <img v-if="getName(singleComment.id).name" :src="`/public/thumbnail/${getName(singleComment.id).id}.png`" class="rounded-circle mr-1"/> -->
                         <Avatar v-if="getName(singleComment.id).name" :username="getName(singleComment.id).name" :size="40"></Avatar>
                     </div>
                     <div class="div">
@@ -53,7 +51,8 @@ import Avatar from 'vue-avatar'
                 page: 1,
                 userLogged: false,
                 btnDisabled: false,
-                currentUser: {}
+                currentUser: {},
+                body: ""
             }
         },
         methods:{
@@ -62,17 +61,32 @@ import Avatar from 'vue-avatar'
                     // console.log(item.comment_id + "==" + id)
                     return item.comment_id == id;
                 })
-                if(user[0]){
-                    // console.log(user[0].name);
-                    return user[0];
-                }
-                else{
-                    return "    "
-                }
+                return user[0] ? user[0] : "";
+            },
+            uploadComment: function(){ 
+               let data = {
+                    body: this.body
+                };
+
+                axios.post(`/comments/${this.video.id}/comment`, data )
+                .then((response)=>{
+                    console.log(response);
+                    this.dataComments = [
+                        response.data,
+                        ...this.dataComments
+                    ]
+
+                    axios.get(`/user/${response.data.user_id}`).then((res)=>{
+                        console.log(res);
+                        res.data['comment_id'] = response.data.id;
+                        this.userInf = [
+                            res.data,
+                            ...this.userInf
+                        ];
+                    });
+                })
             },
             fetchComments: function(){
-                // console.log(`/videos/${this.video.id}/comments?page=${this.page}`);
-                // hide button when max page ######
                 axios.get(`/videos/${this.video.id}/comments?page=${this.page}`)
                 .then((response)=>{
                     console.log(response.data);
