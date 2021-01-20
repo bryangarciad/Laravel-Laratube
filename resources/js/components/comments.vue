@@ -24,7 +24,7 @@
                         <small>{{singleComment.body}}</small> 
                     </div>
                      <!-- REPLIES -->
-                    <replies :commentId="singleComment.id" :currentUser="currentUser"></replies>
+                    <replies :commentId="singleComment.id" :currentUser="currentUser" :currentVideo="video"></replies>
                     <!-- REPLIES -->
                 </div> 
             </div>
@@ -69,7 +69,8 @@ import replies from './replies'
             },
             uploadComment: function(){ 
                let data = {
-                    body: this.body
+                    body: this.body,
+                    comment_id: null
                 };
 
                 axios.post(`/comments/${this.video.id}/comment`, data )

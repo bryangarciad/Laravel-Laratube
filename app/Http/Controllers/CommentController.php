@@ -30,10 +30,22 @@ class CommentController extends Controller
 
     public function store(Video $video){
 
-        return Comment::create([
-            'user_id' => Auth::id(),
-            'video_id' => $video->id,
-            'body' => request()->body
-        ]);
+        if(!request()->comment_id){
+            return Comment::create([
+                'user_id' => Auth::id(),
+                'video_id' => $video->id,
+                'body' => request()->body
+            ]);
+        }
+        else{
+            return Comment::create([
+                'user_id' => Auth::id(),
+                'video_id' => $video->id,
+                'body' => request()->body,
+                'comment_id' => request()->comment_id
+            ]);
+        }
+
+        
     }
 }

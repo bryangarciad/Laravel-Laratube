@@ -2119,7 +2119,8 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
       var _this = this;
 
       var data = {
-        body: this.body
+        body: this.body,
+        comment_id: null
       };
       axios.post("/comments/".concat(this.video.id, "/comment"), data).then(function (response) {
         // console.log(response);
@@ -2192,7 +2193,18 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var vue_avatar__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue-avatar */ "./node_modules/vue-avatar/dist/vue-avatar.min.js");
 /* harmony import */ var vue_avatar__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(vue_avatar__WEBPACK_IMPORTED_MODULE_0__);
-//
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
 //
 //
 //
@@ -2235,13 +2247,21 @@ __webpack_require__.r(__webpack_exports__);
       "default": function _default() {
         return {};
       }
+    },
+    currentVideo: {
+      type: Object,
+      required: true,
+      "default": function _default() {
+        return {};
+      }
     }
   },
   data: function data() {
     return {
       isUserLogged: false,
       replies: [],
-      loaded: false
+      loaded: false,
+      replyBody: ""
     };
   },
   methods: {
@@ -2250,7 +2270,7 @@ __webpack_require__.r(__webpack_exports__);
 
       axios.get("/comments/".concat(this.commentId, "/replies")).then(function (response) {
         if (response.data.length > 0) {
-          _this.replies = response.data;
+          _this.replies = response.data.reverse();
         }
 
         _this.loaded = true;
@@ -2258,6 +2278,23 @@ __webpack_require__.r(__webpack_exports__);
 
         _this.$forceUpdate();
       });
+    },
+    addReply: function addReply() {
+      var _this2 = this;
+
+      if (this.replyBody) {
+        var data = {
+          body: this.replyBody,
+          comment_id: this.commentId
+        };
+        axios.post("/comments/".concat(this.currentVideo.id, "/comment"), data).then(function (response) {
+          console.log(response);
+          _this2.replyBody = "";
+          var newReply = response.data;
+          newReply['user'] = __auth();
+          _this2.replies = [newReply].concat(_toConsumableArray(_this2.replies));
+        });
+      }
     }
   },
   mounted: function mounted() {
@@ -40306,7 +40343,8 @@ var render = function() {
                   _c("replies", {
                     attrs: {
                       commentId: singleComment.id,
-                      currentUser: _vm.currentUser
+                      currentUser: _vm.currentUser,
+                      currentVideo: _vm.video
                     }
                   })
                 ],
@@ -40358,12 +40396,12 @@ var render = function() {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _vm.loaded
-    ? _c("details", { staticClass: "flex-xl-fill wrapper" }, [
+    ? _c("details", { staticClass: "flex-xl-fill wrapper " }, [
         _c("summary", { staticClass: "text-center" }, [_vm._v("View replies")]),
         _vm._v(" "),
         _c(
           "div",
-          { staticClass: "flex-xl-fill wrapper ml-5" },
+          { staticClass: "flex-xl-fill wrapper ml-5 mb-5" },
           [
             _c(
               "div",
@@ -40374,13 +40412,36 @@ var render = function() {
                 }),
                 _vm._v(" "),
                 _c("input", {
+                  directives: [
+                    {
+                      name: "model",
+                      rawName: "v-model",
+                      value: _vm.replyBody,
+                      expression: "replyBody"
+                    }
+                  ],
                   staticClass: "fomr-control form-control-sm w-90 ml-2",
-                  attrs: { type: "text", placeholder: "Reply" }
+                  attrs: { type: "text", placeholder: "Reply" },
+                  domProps: { value: _vm.replyBody },
+                  on: {
+                    input: function($event) {
+                      if ($event.target.composing) {
+                        return
+                      }
+                      _vm.replyBody = $event.target.value
+                    }
+                  }
                 }),
                 _vm._v(" "),
-                _c("button", { staticClass: "btn btn-sm btn-primary ml-2" }, [
-                  _vm._v("Reply")
-                ])
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-sm btn-primary ml-2",
+                    attrs: { disabled: !_vm.replyBody.length > 0 },
+                    on: { click: _vm.addReply }
+                  },
+                  [_vm._v("Reply")]
+                )
               ],
               1
             ),
@@ -40404,7 +40465,7 @@ var render = function() {
                   _c("div", { staticClass: "w-90" }, [
                     _c("h4", [_vm._v(_vm._s(reply.user.name))]),
                     _vm._v(" "),
-                    _c("small", [_vm._v("reply body")])
+                    _c("small", [_vm._v(_vm._s(reply.body))])
                   ])
                 ]
               )
