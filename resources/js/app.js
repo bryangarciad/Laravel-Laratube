@@ -9,6 +9,8 @@ Vue.component('channel-uploads', require('./components/channel-uploads.vue').def
 Vue.component('comments', require('./components/comments.vue').default);
 Vue.component('votes', require('./components/votes.vue').default);
 Vue.component('home', require('./components/home.vue').default);
+Vue.component('replies', require('./components/replies.vue').default);
+
 
 
 

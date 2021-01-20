@@ -19,10 +19,13 @@
                     <div class="mr-3">
                         <Avatar v-if="getName(singleComment.id).name" :username="getName(singleComment.id).name" :size="40"></Avatar>
                     </div>
-                    <div class="div">
+                    <div class="w-90">
                         <h4>{{getName(singleComment.id).name}}</h4>
                         <small>{{singleComment.body}}</small> 
                     </div>
+                     <!-- REPLIES -->
+                    <replies :commentId="singleComment.id" :currentUser="currentUser"></replies>
+                    <!-- REPLIES -->
                 </div> 
             </div>
         </div>
@@ -34,10 +37,11 @@
 
 <script>
 import Avatar from 'vue-avatar'
+import replies from './replies'
 
     export default {
         name: "comments",
-        components:{Avatar},
+        components:{Avatar, replies},
         props:{
             video:{type: Object, required: true, default: ()=>({})},
             channel:{required: true, default: ()=>({})},
@@ -70,14 +74,14 @@ import Avatar from 'vue-avatar'
 
                 axios.post(`/comments/${this.video.id}/comment`, data )
                 .then((response)=>{
-                    console.log(response);
+                    // console.log(response);
                     this.dataComments = [
                         response.data,
                         ...this.dataComments
                     ]
 
                     axios.get(`/user/${response.data.user_id}`).then((res)=>{
-                        console.log(res);
+                        // console.log(res);
                         res.data['comment_id'] = response.data.id;
                         this.userInf = [
                             res.data,
@@ -90,7 +94,7 @@ import Avatar from 'vue-avatar'
             fetchComments: function(){
                 axios.get(`/videos/${this.video.id}/comments?page=${this.page}`)
                 .then((response)=>{
-                    console.log(response.data);
+                    // console.log(response.data);
                     let newData = response.data.data
                     const maxPage = response.data.last_page;
                     if(this.page <= maxPage){
@@ -99,7 +103,7 @@ import Avatar from 'vue-avatar'
                         })
                         this.dataComments.forEach(element => {
                             axios.get(`/user/${element.user_id}`).then((res)=>{
-                                console.log(res);
+                                // console.log(res);
                                 res.data['comment_id'] = element.id;
                                 this.userInf = [
                                     ...this.userInf,
@@ -138,6 +142,7 @@ import Avatar from 'vue-avatar'
     display: flex;
     flex-direction: row;
     align-content: left;;
+    flex-wrap: wrap;
 }
 .comment-container img{
     width: 50px;
@@ -153,6 +158,10 @@ input{
     border-top: 0px;
     border-left: 0px;
     border-right: 0px;
+}
+.replies-wrapper{   
+    flex-basis: 100% !important;
+    margin-left: 15%;
 }
 
 </style>
