@@ -11,9 +11,7 @@ use Illuminate\Support\Facades\Auth;
 class CommentController extends Controller
 {
     public function index(Video $video){
-
         return $video->comments()->paginate(5);
-          
     }
 
     public function show(Comment $comment){
